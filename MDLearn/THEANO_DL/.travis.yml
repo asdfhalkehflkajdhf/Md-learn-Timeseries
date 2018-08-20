@@ -1,0 +1,83 @@
+# After changing this file, check it on:
+# http://lint.travis-ci.org/
+sudo: false
+
+language: python
+#python:
+#  - "2.6"
+#  - "3.3"
+# command to install dependencies
+before_install:
+  - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+  - chmod +x miniconda.sh
+  - ./miniconda.sh -b
+  - export PATH=/home/travis/miniconda/bin:/home/travis/miniconda2/bin:$PATH
+  - conda update --yes conda
+
+install:
+  - conda create --yes -q -n pyenv mkl python=2.7 numpy=1.10 scipy=0.16.1 pip nose yaml pyflakes pillow pyparsing=1.5
+  - source activate pyenv
+  - pip install git+git://github.com/Theano/Theano.git
+
+env:
+  - PART="test.py:test_logistic_sgd test.py:test_logistic_cg test.py:test_mlp test.py:test_convolutional_mlp test.py:test_dA"
+  - PART="test.py:test_SdA test.py:test_lstm"
+  - PART="test.py:test_dbn"
+  - PART="test.py:test_rbm test.py:test_rnnrbm test.py:test_rnnslu"
+  - PART="-e test.py"
+
+#i7-2600K CPU @ 3.40GHz
+#166.572s   #8      test.test_rbm OK
+#155.114s   #7      test.test_dbn OK
+#152.365s   #9      test.test_rnnrbm OK
+#127.286s   #6      test.test_SdA OK
+#39.252s    #5      test.test_dA OK
+#27.56s     #4      test.test_convolutional_mlp OK
+#15.454s    #3      test.test_mlp OK
+#12.732s    #1      test.test_logistic_sgd OK
+#12.638s    #2      test.test_logistic_cg OK
+
+#i7-920
+#296.475s   #7      code.test.test_dbn OK
+#257.272s   #6      code.test.test_SdA OK
+#234.776s   #9      code.test.test_rnnrbm OK
+#233.896s   #8      code.test.test_rbm OK
+#65.737s    #5      code.test.test_dA OK
+#37.658s    #4      code.test.test_convolutional_mlp OK
+#24.172s    #3      code.test.test_mlp OK
+#20.401s    #1      code.test.test_logistic_sgd OK
+#17.546s    #2      code.test.test_logistic_cg OK
+
+# On Core2 duo E8500 with MRG
+#308.004s   #7      code.test.test_dbn OK
+#277.268s   #6      code.test.test_SdA OK
+#126.102s   #8      code.test.test_rbm OK
+#123.652s   #9      code.test.test_rnnrbm OK
+#77.101s    #5      code.test.test_dA OK
+#39.75s     #4      code.test.test_convolutional_mlp OK
+#30.406s    #3      code.test.test_mlp OK
+#21.132s    #2      code.test.test_logistic_cg OK
+#17.945s    #1      code.test.test_logistic_sgd OK
+
+# Unknown computer with older version of Theano
+#569.882s   #9      code.test.test_rbm OK
+#298.992s   #8      code.test.test_dbn OK
+#268.901s   #7      code.test.test_SdA OK
+#67.292s    #6      code.test.test_dA OK
+#27.485s    #4      code.test.test_mlp OK
+#26.204s    #5      code.test.test_convolutional_mlp OK
+#14.676s    #3      code.test.test_logistic_cg OK
+#10.66s     #2      code.test.test_logistic_sgd OK
+#5.795s     #1      code.hmc.test_hmc.test_hmc OK
+
+script:
+  - cd data
+  - ./download.sh
+  - ls
+  - cd ../code
+  - pwd
+  - ls
+  - export THEANO_FLAGS=warn.ignore_bug_before=all,on_opt_error=raise,on_shape_error=raise
+  - python --version
+  - nosetests -v $PART
+
